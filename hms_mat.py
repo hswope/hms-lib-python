@@ -1,7 +1,23 @@
 ﻿"""
 Class Matrix is used to store and manipulate matrices. Matrices are stored as an array of arrays with traditional row and column
 definitions respected. For example a 1 dimensional array will always be a matrix with a single row.
+
+supported arrays are like:
+[1]
+[1,2,3,...]
+[[1,2,3,...],[1,2,3,...],...]
+
+These values can be used in the constructor and the set command
+
+To get matrix values the class supports:
+get
+getItem
+print(Matrix)
+
+Current operations supported are:
+*
 """
+
 import copy
 from numbers import Number
 
@@ -10,18 +26,18 @@ class Matrix:
 	
 	######################################################################################
 	# Object initialization
-	def __init__(self):
+	# @param val {Matrix or [[]]} - the initial value of the matrix
+	def __init__(self,val=None):
 		self.typeErrorMessage = "Value must be a an array or an array of arrays of numbers and rows must be of equal length"
 		self.matrix = []
-		self.mutli = False
 		self.rows = 0
 		self.cols = 0
+		if not val is None:
+			self.set(val)
 		
 	######################################################################################
 	# @returns - string reprsentation of its matrix
 	def __str__(self):
-		if not self.multi:
-			return str(self.matrix)
 		strMatrix = ""
 		for item in self.matrix:
 			if strMatrix != "" :
@@ -46,7 +62,6 @@ class Matrix:
 	# Sets the value of the matrix
 	# @param val - An array or an array of arrays of numbers
 	#
-	# if val is array test to make sure elements are numbers
 	# supported arrays are like:
 	# [1]
 	# [1,2,3,...]
@@ -55,7 +70,6 @@ class Matrix:
 		
 		# if val is matrix
 		if isinstance(val,Matrix):
-			self.multi = val.getIsMulti()
 			self.matrix = val.get()
 			self.rows = val.getRows()
 			self.cols = val.getCols()
@@ -65,15 +79,13 @@ class Matrix:
 			raise TypeError(self.typeErrorMessage)
 		
 		if len(val) == 0:
-			self.matrix = []
-			self.multi = False
+			self.matrix = [[]]
 			self.rows = 0
 			self.cols = 0
 			return
 		
 		if self._isListOfNumbers(val):
-			self.matrix = copy.deepcopy(val)
-			self.multi = False
+			self.matrix = [copy.deepcopy(val)]
 			self.rows = 1
 			self.cols = len(val)
 			return
@@ -88,7 +100,6 @@ class Matrix:
 		self.matrix = copy.deepcopy(val)
 		self.rows = rows
 		self.cols = cols
-		self.multi = True
 	
 	######################################################################################
 	# Returns a copy of the underlying array
@@ -101,17 +112,7 @@ class Matrix:
 	# @param row - integer representing the row to be accessed
 	# @para col - integer representing the col to be accessed
 	def getItem(self,row,col):
-		if self.multi:
-			return self.matrix[row][col]
-		if row == 0:
-			return self.matrix[col]
-		
-		return None
-		
-	######################################################################################
-	# Returns true if matrix is multi dimensional
-	def getIsMulti(self):
-		return self.multi
+		return self.matrix[row][col]
 		
 	######################################################################################
 	# Returns the number of rows in the matrix
@@ -129,14 +130,17 @@ class Matrix:
 	def __mul__(self,other):
 		if not isinstance(other,Matrix):
 			raise TypeError("You can only multiple this Matrix with another Matrix")
-		if self.cols != other.rows:
+		if self.getCols() != other.getRows():
 			raise TypeError("The number of rows for the given matrix must be equal to the number of columns of the current matrix")
 		
-		for r in range(0,rows):
-			sum = 0
-			for c in range(0,cols):
-				sum += self.getItem(row,col) * other.getItem(col,row)
-			
+		result = []
+		for r1 in range(0,self.rows):
+			result.append([])
+			for c2 in range(0,other.getCols()):
+				sum = 0
+				for c1 in range(0,self.cols):
+					sum += self.getItem(r1,c1) * other.getItem(c1,c2)
+				result[r1].append(sum)
+				
+		return Matrix(result)
 		
-		result = Matrix()
-		return result
